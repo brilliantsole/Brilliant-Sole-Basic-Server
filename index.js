@@ -77,3 +77,29 @@ const udpSocket = dgram.createSocket("udp4");
 const udpServer = new BS.UDPServer();
 udpServer.socket = udpSocket;
 udpSocket.bind(3000);
+
+// DEVICE LISTENERS
+
+/** @param {BS.DeviceEventMap["acceleration"]} event */
+function onAcceleration(event) {
+  console.log(event.message.acceleration);
+}
+
+/** @type {BS.BoundDeviceEventListeners} */
+const boundDeviceEventListeners = {
+  acceleration: onAcceleration,
+};
+
+BS.DeviceManager.AddEventListener("deviceIsConnected", (event) => {
+  const { device } = event.message;
+  console.log(
+    `device "${device.name}" ${
+      device.isConnected ? "connected" : "disconnected"
+    }`
+  );
+  if (device.isConnected) {
+    BS.EventUtils.addEventListeners(device, boundDeviceEventListeners);
+  } else {
+    BS.EventUtils.removeEventListeners(device, boundDeviceEventListeners);
+  }
+});
