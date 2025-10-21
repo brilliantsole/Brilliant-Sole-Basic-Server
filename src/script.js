@@ -262,6 +262,7 @@ BS.DeviceManager.AddEventListener("connectedDevices", (event) => {
         .querySelector(".connectedDevice");
       connectedDeviceContainers[device.bluetoothId] = connectedDeviceContainer;
 
+      // DEVICE INFORMATION
       /** @type {HTMLPreElement} */
       const deviceInformationPre =
         connectedDeviceContainer.querySelector(".deviceInformation");
@@ -276,6 +277,7 @@ BS.DeviceManager.AddEventListener("connectedDevices", (event) => {
         setDeviceInformationPre()
       );
 
+      // DEVICE BATTERY
       /** @type {HTMLSpanElement} */
       const batteryLevelSpan =
         connectedDeviceContainer.querySelector(".batteryLevel");
@@ -284,12 +286,14 @@ BS.DeviceManager.AddEventListener("connectedDevices", (event) => {
       setBatteryLevelSpan();
       device.addEventListener("batteryLevel", () => setBatteryLevelSpan());
 
+      // DEVICE NAME
       /** @type {HTMLSpanElement} */
       const nameSpan = connectedDeviceContainer.querySelector(".name");
       const setNameSpan = () => (nameSpan.innerText = device.name);
       setNameSpan();
       device.addEventListener("getName", () => setNameSpan());
 
+      // DEVICE TYPE
       /** @type {HTMLSpanElement} */
       const deviceTypeSpan =
         connectedDeviceContainer.querySelector(".deviceType");
@@ -297,6 +301,7 @@ BS.DeviceManager.AddEventListener("connectedDevices", (event) => {
       setDeviceTypeSpan();
       device.addEventListener("getType", () => setDeviceTypeSpan());
 
+      // DEVICE SENSOR CONFIGURATION
       /** @type {HTMLPreElement} */
       const sensorConfigurationPre = connectedDeviceContainer.querySelector(
         ".sensorConfiguration"
@@ -360,6 +365,7 @@ BS.DeviceManager.AddEventListener("connectedDevices", (event) => {
         }
       });
 
+      // DEVICE SENSOR DATA
       /** @type {HTMLPreElement} */
       const sensorDataPre =
         connectedDeviceContainer.querySelector(".sensorData");
@@ -367,6 +373,7 @@ BS.DeviceManager.AddEventListener("connectedDevices", (event) => {
         (sensorDataPre.textContent = JSON.stringify(event.message, null, 2));
       device.addEventListener("sensorData", (event) => setSensorDataPre(event));
 
+      // DEVICE CONNECTION
       /** @type {HTMLButtonElement} */
       const toggleConnectionButton =
         connectedDeviceContainer.querySelector(".toggleConnection");
@@ -393,6 +400,284 @@ BS.DeviceManager.AddEventListener("connectedDevices", (event) => {
       device.addEventListener("connectionStatus", () =>
         updateToggleConnectionButton()
       );
+
+      // DEVICE CAMERA
+      const deviceCameraContaner =
+        connectedDeviceContainer.querySelector(".camera");
+
+      /** @type {HTMLImageElement} */
+      const deviceCameraImage =
+        deviceCameraContaner.querySelector(".cameraImage");
+      device.addEventListener("cameraImage", (event) => {
+        deviceCameraImage.src = event.message.url;
+      });
+
+      /** @type {HTMLButtonElement} */
+      const takePictureButton =
+        deviceCameraContaner.querySelector(".takePicture");
+      takePictureButton.addEventListener("click", () => {
+        device.takePicture();
+      });
+      const updateTakePictureButton = () => {
+        const { cameraStatus } = device;
+        let innerText = "take picture";
+        let enabled = false;
+        switch (cameraStatus) {
+          case "takingPicture":
+            innerText = "taking picture...";
+            enabled = true;
+            break;
+          case "idle":
+            enabled = true;
+            break;
+          case "focusing":
+            break;
+          case "asleep":
+            break;
+        }
+        takePictureButton.disabled = !enabled;
+        takePictureButton.innerText = innerText;
+      };
+      device.addEventListener("cameraStatus", () => {
+        updateTakePictureButton();
+      });
+
+      /** @type {HTMLButtonElement} */
+      const focusCameraButton =
+        deviceCameraContaner.querySelector(".focusCamera");
+      focusCameraButton.addEventListener("click", () => {
+        device.focusCamera();
+      });
+      const updateFocusCameraButton = () => {
+        const { cameraStatus } = device;
+        let innerText = "focus camera";
+        let enabled = false;
+        switch (cameraStatus) {
+          case "takingPicture":
+            break;
+          case "idle":
+            enabled = true;
+            break;
+          case "focusing":
+            innerText = "focusing...";
+            break;
+          case "asleep":
+            break;
+        }
+        focusCameraButton.disabled = !enabled;
+        focusCameraButton.innerText = innerText;
+      };
+      device.addEventListener("cameraStatus", () => {
+        updateFocusCameraButton();
+      });
+      device.addEventListener("cameraStatus", (event) => {
+        const { previousCameraStatus } = event.message;
+        if (previousCameraStatus == "focusing") {
+          device.takePicture();
+        }
+      });
+
+      let autoPicture = false;
+      /** @type {HTMLButtonElement} */
+      const autoPictureCheckbox =
+        deviceCameraContaner.querySelector(".autoPicture");
+      autoPictureCheckbox.addEventListener("input", () => {
+        autoPicture = autoPictureCheckbox.checked;
+        console.log({ autoPicture });
+      });
+      autoPictureCheckbox.checked = autoPicture;
+      device.addEventListener("cameraImage", () => {
+        if (autoPicture) {
+          device.takePicture();
+        }
+      });
+
+      /** @type {HTMLPreElement} */
+      const cameraConfigurationPre = deviceCameraContaner.querySelector(
+        ".cameraConfigurationPre"
+      );
+      const updateCameraConfigurationPre = () => {
+        cameraConfigurationPre.textContent = JSON.stringify(
+          device.cameraConfiguration,
+          null,
+          2
+        );
+      };
+      device.addEventListener("getCameraConfiguration", () => {
+        updateCameraConfigurationPre();
+        updateCameraWhiteBalanceInput();
+      });
+
+      /** @type {HTMLInputElement} */
+      const takePictureAfterUpdateCheckbox = deviceCameraContaner.querySelector(
+        ".takePictureAfterUpdate"
+      );
+      let takePictureAfterUpdate = false;
+      takePictureAfterUpdateCheckbox.addEventListener("input", () => {
+        takePictureAfterUpdate = takePictureAfterUpdateCheckbox.checked;
+        console.log({ takePictureAfterUpdate });
+      });
+
+      const cameraConfigurationContainer = deviceCameraContaner.querySelector(
+        ".cameraConfiguration"
+      );
+      /** @type {HTMLTemplateElement} */
+      const cameraConfigurationTypeTemplate =
+        deviceCameraContaner.querySelector(".cameraConfigurationTypeTemplate");
+      BS.CameraConfigurationTypes.forEach((cameraConfigurationType) => {
+        const cameraConfigurationTypeContainer =
+          cameraConfigurationTypeTemplate.content
+            .cloneNode(true)
+            .querySelector(".cameraConfigurationType");
+
+        cameraConfigurationContainer.appendChild(
+          cameraConfigurationTypeContainer
+        );
+
+        cameraConfigurationTypeContainer.querySelector(".type").innerText =
+          cameraConfigurationType;
+
+        /** @type {HTMLInputElement} */
+        const input = cameraConfigurationTypeContainer.querySelector("input");
+
+        /** @type {HTMLSpanElement} */
+        const span = cameraConfigurationTypeContainer.querySelector("span");
+
+        device.addEventListener("isConnected", () => {
+          updateisInputDisabled();
+        });
+        device.addEventListener("cameraStatus", () => {
+          updateisInputDisabled();
+        });
+        const updateisInputDisabled = () => {
+          input.disabled =
+            !device.isConnected ||
+            !device.hasCamera ||
+            device.cameraStatus != "idle";
+        };
+        updateisInputDisabled();
+
+        const updateInput = () => {
+          const value = device.cameraConfiguration[cameraConfigurationType];
+          span.innerText = value;
+          input.value = value;
+        };
+
+        const updateRange = () => {
+          if (!device.hasCamera) {
+            return;
+          }
+          const range =
+            device.cameraConfigurationRanges[cameraConfigurationType];
+          input.min = range.min;
+          input.max = range.max;
+        };
+        device.addEventListener("connected", () => {
+          updateRange();
+          updateInput();
+        });
+        updateRange();
+        updateInput();
+
+        device.addEventListener("getCameraConfiguration", () => {
+          updateInput();
+        });
+
+        input.addEventListener("change", () => {
+          const value = Number(input.value);
+          // console.log(`updating ${cameraConfigurationType} to ${value}`);
+          device.setCameraConfiguration({
+            [cameraConfigurationType]: value,
+          });
+          if (takePictureAfterUpdate) {
+            device.addEventListener(
+              "getCameraConfiguration",
+              () => {
+                setTimeout(() => device.takePicture()), 100;
+              },
+              { once: true }
+            );
+          }
+        });
+      });
+
+      /** @type {HTMLInputElement} */
+      const cameraWhiteBalanceInput = deviceCameraContaner.querySelector(
+        ".cameraWhiteBalance"
+      );
+      const updateWhiteBalance = BS.ThrottleUtils.throttle(
+        (config) => {
+          if (device.cameraStatus != "idle") {
+            return;
+          }
+
+          device.setCameraConfiguration(config);
+
+          if (takePictureAfterUpdate) {
+            device.addEventListener(
+              "getCameraConfiguration",
+              () => {
+                setTimeout(() => device.takePicture()), 100;
+              },
+              { once: true }
+            );
+          }
+        },
+        200,
+        true
+      );
+      cameraWhiteBalanceInput.addEventListener("input", () => {
+        let [redGain, greenGain, blueGain] = cameraWhiteBalanceInput.value
+          .replace("#", "")
+          .match(/.{1,2}/g)
+          .map((value) => Number(`0x${value}`))
+          .map((value) => value / 255)
+          .map((value) => value * device.cameraConfigurationRanges.blueGain.max)
+          .map((value) => Math.round(value));
+
+        updateWhiteBalance({ redGain, greenGain, blueGain });
+      });
+      const updateCameraWhiteBalanceInput = () => {
+        if (!device.hasCamera) {
+          return;
+        }
+        cameraWhiteBalanceInput.disabled =
+          !device.isConnected ||
+          !device.hasCamera ||
+          device.cameraStatus != "idle";
+
+        const { redGain, blueGain, greenGain } = device.cameraConfiguration;
+
+        cameraWhiteBalanceInput.value = `#${[redGain, blueGain, greenGain]
+          .map((value) => value / device.cameraConfigurationRanges.redGain.max)
+          .map((value) => value * 255)
+          .map((value) => Math.round(value))
+          .map((value) => value.toString(16))
+          .join("")}`;
+      };
+
+      device.addEventListener("cameraStatus", () => {
+        updateCameraWhiteBalanceInput();
+      });
+
+      const updateDeviceCameraContainer = () => {
+        if (device.isConnected) {
+          deviceCameraContaner.removeAttribute("hidden");
+        } else {
+          deviceCameraContaner.setAttribute("hidden", "");
+        }
+        updateFocusCameraButton();
+        updateTakePictureButton();
+        updateCameraConfigurationPre();
+        updateCameraWhiteBalanceInput();
+      };
+      device.addEventListener("isConnected", () => {
+        updateDeviceCameraContainer();
+      });
+      updateDeviceCameraContainer();
+
+      // DEVICE MICROPHONE
+      // FILL
     }
     connectedDevicesContainer.appendChild(connectedDeviceContainer);
   });

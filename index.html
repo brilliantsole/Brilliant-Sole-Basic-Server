@@ -8,15 +8,17 @@
     .block {
       display: block;
     }
-    div {
-      margin-top: 1rem;
-    }
+
     ul,
     ol {
       margin-top: 0;
     }
     .hidden {
       display: none;
+    }
+
+    img {
+      max-width: 200px;
     }
   </style>
 
@@ -104,6 +106,44 @@
               <b>sensor data: </b>
               <pre class="sensorData"></pre>
             </label>
+
+            <div class="camera" hidden>
+              <button class="takePicture">take picture</button>
+              <button class="focusCamera">focus camera</button>
+              <br />
+              <label>
+                auto picture <input type="checkbox" class="autoPicture" />
+              </label>
+              <br />
+              <label>
+                <b>camera configuration: </b>
+                <pre class="cameraConfigurationPre"></pre>
+              </label>
+
+              <label>
+                take picture after update?
+                <input type="checkbox" class="takePictureAfterUpdate" />
+              </label>
+
+              <div class="cameraConfiguration">
+                <template class="cameraConfigurationTypeTemplate">
+                  <div class="cameraConfigurationType">
+                    <label>
+                      <input class="value" type="range" value="" disabled />
+                      <b class="type"></b> <span></span>
+                    </label>
+                  </div>
+                </template>
+              </div>
+              <label>
+                <b>white balance</b>
+                <input type="color" class="cameraWhiteBalance" disabled />
+              </label>
+              <br />
+              <img class="cameraImage" />
+            </div>
+
+            <div class="microphone" hidden></div>
           </div>
         </template>
       </div>
