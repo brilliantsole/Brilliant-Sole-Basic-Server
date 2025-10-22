@@ -240,6 +240,7 @@ BS.DeviceManager.AddEventListener("deviceIsConnected", (event) => {
 
 const audioContext = new (window.AudioContext || window.webkitAudioContext)({
   sampleRate: 16_000,
+  latencyHint: "interactive",
 });
 window.audioContext = audioContext;
 const checkAudioContextState = () => {
@@ -429,7 +430,6 @@ BS.DeviceManager.AddEventListener("connectedDevices", (event) => {
       const deviceCameraImage =
         deviceCameraContianer.querySelector(".cameraImage");
       device.addEventListener("cameraImage", (event) => {
-        console.log("cameraImage");
         deviceCameraImage.src = event.message.url;
       });
 
@@ -912,6 +912,63 @@ BS.DeviceManager.AddEventListener("connectedDevices", (event) => {
         updateMicrophoneButtons();
       });
 
+      device.audioContext = audioContext;
+      device.microphoneGainNode.gain.value = 10;
+
+      /** @type {HTMLAudioElement} */
+      const microphoneStreamAudioElement =
+        deviceMicrophoneContianer.querySelector(".microphoneStream");
+      microphoneStreamAudioElement.srcObject =
+        device.microphoneMediaStreamDestination.stream;
+
+      /** @type {HTMLAudioElement} */
+      const microphoneRecordingAudioElement =
+        deviceMicrophoneContianer.querySelector(".microphoneRecording");
+      /** @type {HTMLInputElement} */
+      const autoPlayMicrphoneRecordingCheckbox =
+        deviceMicrophoneContianer.querySelector(".autoPlayMicrphoneRecording");
+      let autoPlayMicrphoneRecording =
+        autoPlayMicrphoneRecordingCheckbox.checked;
+      autoPlayMicrphoneRecordingCheckbox.addEventListener("input", () => {
+        autoPlayMicrphoneRecording = autoPlayMicrphoneRecordingCheckbox.checked;
+        console.log({ autoPlayMicrphoneRecording });
+      });
+      device.addEventListener("microphoneRecording", (event) => {
+        microphoneRecordingAudioElement.src = event.message.url;
+        if (autoPlayMicrphoneRecording) {
+          microphoneRecordingAudioElement.play();
+        }
+      });
+
+      const peaksOptions = {
+        zoomview: {
+          container: deviceMicrophoneContianer.querySelector(
+            ".zoomview-container"
+          ),
+        },
+        overview: {
+          container: deviceMicrophoneContianer.querySelector(
+            ".overview-container"
+          ),
+        },
+        mediaElement: deviceMicrophoneContianer.querySelector(
+          ".microphoneRecording"
+        ),
+        webAudio: {
+          audioContext: audioContext,
+          scale: 128,
+          multiChannel: false,
+        },
+      };
+
+      microphoneRecordingAudioElement.addEventListener("loadeddata", () => {
+        peaks.init(peaksOptions, (error, peaksInstance) => {
+          if (error) {
+            console.error("error initializing peaks", error);
+          }
+        });
+      });
+
       const updateDeviceMicrophoneContainer = () => {
         if (device.isConnected) {
           deviceMicrophoneContianer.removeAttribute("hidden");
@@ -928,9 +985,6 @@ BS.DeviceManager.AddEventListener("connectedDevices", (event) => {
       });
       updateDeviceMicrophoneContainer();
     }
-
-    device.audioContext = audioContext;
-    device.microphoneGainNode.gain.value = 10;
 
     connectedDevicesContainer.appendChild(connectedDeviceContainer);
   });

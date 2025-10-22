@@ -1,6 +1,7 @@
 <html>
   <head>
     <title>Server Sample | BrilliantSole JavaScript SDK</title>
+    <script src="https://unpkg.com/peaks.js/dist/peaks.js"></script>
     <script type="module" src="./src/script.js"></script>
   </head>
 
@@ -19,6 +20,12 @@
 
     img {
       max-width: 200px;
+    }
+
+    .zoomview-container,
+    .overview-container {
+      width: 1000px;
+      height: 100px;
     }
   </style>
 
@@ -187,7 +194,7 @@
               <div>
                 <b>stream</b>
                 <br />
-                <audio class="microphoneStream" controls autoplay></audio>
+                <audio muted class="microphoneStream" controls autoplay></audio>
               </div>
 
               <div>
