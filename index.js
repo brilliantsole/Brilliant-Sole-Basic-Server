@@ -8,6 +8,9 @@ import path from "path";
 import * as BS from "brilliantsole/node";
 import { WebSocketServer } from "ws";
 import * as dgram from "dgram";
+import dotenv from "dotenv";
+
+dotenv.config({ path: "./config.env" });
 
 process.on("warning", (e) => console.warn(e.stack));
 
@@ -34,8 +37,9 @@ app.use(function (req, res, next) {
 
   next();
 });
-const useHttps = false;
-const redirectToHttps = useHttps && false;
+
+const useHttps = process.env.USE_HTTPS == "true";
+const redirectToHttps = useHttps && process.env.REDIRECT_TO_HTTPS == "true";
 app.use((req, res, next) => {
   const host = req.headers.host;
   if (redirectToHttps && req.protocol !== "https") {
@@ -128,7 +132,7 @@ function onMicrophoneData(event) {
   //console.log(event.message.samples);
 }
 
-const autoRecordMicrophone = true;
+const autoRecordMicrophone = process.env.AUTO_RECORD_MICROPHONE == "true";
 /** @param {BS.DeviceEventMap["microphoneStatus"]} event */
 function onMicrophoneStatus(event) {
   if (!autoRecordMicrophone) {
@@ -145,7 +149,8 @@ function onMicrophoneStatus(event) {
   }
 }
 
-const saveMicrophoneRecordingsToFolder = true;
+const saveMicrophoneRecordingsToFolder =
+  process.env.SAVE_MICROPHONE_RECORDINGS_TO_FOLDER == "true";
 /** @param {BS.DeviceEventMap["microphoneRecording"]} event */
 function onMicrophoneRecording(event) {
   if (!saveMicrophoneRecordingsToFolder) {
@@ -158,6 +163,7 @@ function onMicrophoneRecording(event) {
   );
 }
 
+// save all pictures to the /cameraImages folder
 const saveImagesToFolder = true;
 /** @param {BS.DeviceEventMap["cameraImage"]} event */
 function onCameraImage(event) {
