@@ -15,6 +15,7 @@ dotenv.config({ path: "./config.env" });
 process.on("warning", (e) => console.warn(e.stack));
 
 // BS.setAllConsoleLevelFlags({ log: true });
+// BS.setConsoleLevelFlagsForType("EventDispatcher", { log: false });
 
 // HTTPS SERVER
 app.use(function (req, res, next) {
