@@ -4,6 +4,7 @@ import http from "http";
 const app = express();
 import fs from "fs";
 import ip from "ip";
+import path from "path";
 import * as BS from "brilliantsole/node";
 import { WebSocketServer } from "ws";
 import * as dgram from "dgram";
@@ -78,16 +79,105 @@ const udpServer = new BS.UDPServer();
 udpServer.socket = udpSocket;
 udpSocket.bind(3000);
 
+// MICROPONE RECORDINGS
+
+const microphoneFolderName = "microphoneRecordings";
+const microphoneFolderPath = `./${microphoneFolderName}`;
+if (!fs.existsSync(microphoneFolderPath)) {
+  fs.mkdirSync(microphoneFolderPath);
+  console.log(`Folder '${microphoneFolderName}' created successfully.`);
+} else {
+  console.log(`Folder '${microphoneFolderName}' already exists.`);
+}
+
+// CAMERA IMAGES
+
+const cameraFolderName = "cameraImages";
+const cameraFolderPath = `./${cameraFolderName}`;
+if (!fs.existsSync(cameraFolderPath)) {
+  fs.mkdirSync(cameraFolderPath);
+  console.log(`Folder '${cameraFolderPath}' created successfully.`);
+} else {
+  console.log(`Folder '${cameraFolderPath}' already exists.`);
+}
+
+// BLOB
+
+async function saveBlobUrlContent(folderPath, blob, filename) {
+  try {
+    const arrayBuffer = await blob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const filePath = path.join(folderPath, filename);
+    fs.writeFileSync(filePath, buffer);
+    console.log(`File '${filename}' saved successfully in '${folderPath}'.`);
+  } catch (err) {
+    console.error(`Error saving blob URL content: ${err}`);
+  }
+}
+
 // DEVICE LISTENERS
 
 /** @param {BS.DeviceEventMap["acceleration"]} event */
 function onAcceleration(event) {
-  console.log(event.message.acceleration);
+  //console.log(event.message.acceleration);
+}
+
+/** @param {BS.DeviceEventMap["microphoneData"]} event */
+function onMicrophoneData(event) {
+  //console.log(event.message.samples);
+}
+
+const autoRecordMicrophone = true;
+/** @param {BS.DeviceEventMap["microphoneStatus"]} event */
+function onMicrophoneStatus(event) {
+  if (!autoRecordMicrophone) {
+    return;
+  }
+  const device = event.target;
+  const { microphoneStatus } = event.message;
+  if (microphoneStatus == "streaming") {
+    device.startRecordingMicrophone();
+  } else {
+    if (device.isRecordingMicrophone) {
+      device.stopRecordingMicrophone();
+    }
+  }
+}
+
+const saveMicrophoneRecordingsToFolder = true;
+/** @param {BS.DeviceEventMap["microphoneRecording"]} event */
+function onMicrophoneRecording(event) {
+  if (!saveMicrophoneRecordingsToFolder) {
+    return;
+  }
+  saveBlobUrlContent(
+    microphoneFolderPath,
+    event.message.blob,
+    `${new Date().toLocaleString().replaceAll("/", "-")}.wav`
+  );
+}
+
+const saveImagesToFolder = true;
+/** @param {BS.DeviceEventMap["cameraImage"]} event */
+function onCameraImage(event) {
+  if (!saveImagesToFolder) {
+    return;
+  }
+  saveBlobUrlContent(
+    cameraFolderPath,
+    event.message.blob,
+    `${new Date().toLocaleString().replaceAll("/", "-")}.jpg`
+  );
 }
 
 /** @type {BS.BoundDeviceEventListeners} */
 const boundDeviceEventListeners = {
   acceleration: onAcceleration,
+  microphoneData: onMicrophoneData,
+  microphoneRecording: onMicrophoneRecording,
+  microphoneStatus: onMicrophoneStatus,
+  cameraImage: onCameraImage,
 };
 
 BS.DeviceManager.AddEventListener("deviceIsConnected", (event) => {

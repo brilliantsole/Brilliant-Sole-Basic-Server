@@ -108,8 +108,15 @@
             </label>
 
             <div class="camera" hidden>
+              <h3>Camera</h3>
               <button class="takePicture">take picture</button>
               <button class="focusCamera">focus camera</button>
+              <progress
+                value="0"
+                min="0"
+                max="1"
+                class="cameraProgress"
+              ></progress>
               <br />
               <label>
                 auto picture <input type="checkbox" class="autoPicture" />
@@ -143,7 +150,59 @@
               <img class="cameraImage" />
             </div>
 
-            <div class="microphone" hidden></div>
+            <div class="microphone" hidden>
+              <h3>Microphone</h3>
+              <label>
+                <b>status:</b> <span class="microphoneStatus"></span>
+              </label>
+
+              <button disabled hidden class="toggleMicrophone">
+                start microphone
+              </button>
+              <button disabled class="startMicrophone">start microphone</button>
+              <button disabled class="stopMicrophone">stop microphone</button>
+              <br />
+              <button disabled class="toggleMicrophoneRecording">
+                start recording
+              </button>
+
+              <br />
+              <label>
+                <b>microphone configuration: </b>
+                <pre class="microphoneConfigurationPre"></pre>
+              </label>
+              <br />
+
+              <div class="microphoneConfiguration">
+                <template class="microphoneConfigurationTypeTemplate">
+                  <label class="microphoneConfigurationType">
+                    <b class="type"></b> <span hidden></span>
+                    <select disabled>
+                      <optgroup></optgroup>
+                    </select>
+                  </label>
+                </template>
+              </div>
+
+              <div>
+                <b>stream</b>
+                <br />
+                <audio class="microphoneStream" controls autoplay></audio>
+              </div>
+
+              <div>
+                <b>recording</b>
+                <label>
+                  auto play
+                  <input type="checkbox" class="autoPlayMicrphoneRecording" />
+                </label>
+                <br />
+                <audio class="microphoneRecording" controls></audio>
+              </div>
+
+              <div class="zoomview-container"></div>
+              <div class="overview-container"></div>
+            </div>
           </div>
         </template>
       </div>
