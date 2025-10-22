@@ -124,7 +124,12 @@ async function saveBlobUrlContent(folderPath, blob, filename) {
 
 /** @param {BS.DeviceEventMap["acceleration"]} event */
 function onAcceleration(event) {
-  //console.log(event.message.acceleration);
+  const device = event.target;
+  const { acceleration, timestamp } = event.message;
+  console.log(
+    `[${timestamp}] received acceleration data from "${device.name}"`,
+    acceleration
+  );
 }
 
 /** @param {BS.DeviceEventMap["microphoneData"]} event */
