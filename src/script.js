@@ -143,8 +143,6 @@ client.addEventListener("discoveredDevice", (event) => {
       delete discoveredDeviceContainer._onDevice;
     };
 
-    discoveredDeviceContainer._onDevice = onDevice;
-
     /** @param {BS.Device} device */
     const updateToggleConnectionButton = (device) => {
       console.log({ deviceConnectionStatus: device.connectionStatus });
@@ -163,6 +161,12 @@ client.addEventListener("discoveredDevice", (event) => {
           break;
       }
     };
+
+    discoveredDeviceContainer._onDevice = onDevice;
+    let device = client.devices[discoveredDevice.bluetoothId];
+    if (device) {
+      onDevice(device);
+    }
 
     discoveredDeviceContainers[discoveredDevice.bluetoothId] =
       discoveredDeviceContainer;
