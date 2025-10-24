@@ -84,28 +84,6 @@ const udpServer = new BS.UDPServer();
 udpServer.socket = udpSocket;
 udpSocket.bind(3000);
 
-// MICROPONE RECORDINGS
-
-const microphoneFolderName = "microphoneRecordings";
-const microphoneFolderPath = `./${microphoneFolderName}`;
-if (!fs.existsSync(microphoneFolderPath)) {
-  fs.mkdirSync(microphoneFolderPath);
-  console.log(`Folder '${microphoneFolderName}' created successfully.`);
-} else {
-  console.log(`Folder '${microphoneFolderName}' already exists.`);
-}
-
-// CAMERA IMAGES
-
-const cameraFolderName = "cameraImages";
-const cameraFolderPath = `./${cameraFolderName}`;
-if (!fs.existsSync(cameraFolderPath)) {
-  fs.mkdirSync(cameraFolderPath);
-  console.log(`Folder '${cameraFolderPath}' created successfully.`);
-} else {
-  console.log(`Folder '${cameraFolderPath}' already exists.`);
-}
-
 // BLOB
 
 async function saveBlobUrlContent(folderPath, blob, filename) {
@@ -121,21 +99,31 @@ async function saveBlobUrlContent(folderPath, blob, filename) {
   }
 }
 
-// DEVICE LISTENERS
+// MICROPHONE
 
-/** @param {BS.DeviceEventMap["acceleration"]} event */
-function onAcceleration(event) {
-  const device = event.target;
-  const { acceleration, timestamp } = event.message;
-  console.log(
-    `[${timestamp}] received acceleration data from "${device.name}"`,
-    acceleration
+const saveMicrophoneRecordingsToFolder =
+  process.env.SAVE_MICROPHONE_RECORDINGS_TO_FOLDER == "true";
+/** @param {BS.DeviceEventMap["microphoneRecording"]} event */
+function onMicrophoneRecording(event) {
+  if (!saveMicrophoneRecordingsToFolder) {
+    return;
+  }
+  saveBlobUrlContent(
+    microphoneFolderPath,
+    event.message.blob,
+    `${new Date().toLocaleString().replaceAll("/", "-")}.wav`
   );
 }
 
-/** @param {BS.DeviceEventMap["microphoneData"]} event */
-function onMicrophoneData(event) {
-  //console.log(event.message.samples);
+const microphoneFolderName = "microphoneRecordings";
+const microphoneFolderPath = `./${microphoneFolderName}`;
+if (saveMicrophoneRecordingsToFolder) {
+  if (!fs.existsSync(microphoneFolderPath)) {
+    fs.mkdirSync(microphoneFolderPath);
+    console.log(`Folder '${microphoneFolderName}' created successfully.`);
+  } else {
+    console.log(`Folder '${microphoneFolderName}' already exists.`);
+  }
 }
 
 const autoRecordMicrophone = process.env.AUTO_RECORD_MICROPHONE == "true";
@@ -155,25 +143,25 @@ function onMicrophoneStatus(event) {
   }
 }
 
-const saveMicrophoneRecordingsToFolder =
-  process.env.SAVE_MICROPHONE_RECORDINGS_TO_FOLDER == "true";
-/** @param {BS.DeviceEventMap["microphoneRecording"]} event */
-function onMicrophoneRecording(event) {
-  if (!saveMicrophoneRecordingsToFolder) {
-    return;
+// CAMERA
+
+const saveCameraImagesToFolder =
+  process.env.SAVE_CAMERA_IMAGES_TO_FOLDER == "true";
+
+const cameraFolderName = "cameraImages";
+const cameraFolderPath = `./${cameraFolderName}`;
+if (saveCameraImagesToFolder) {
+  if (!fs.existsSync(cameraFolderPath)) {
+    fs.mkdirSync(cameraFolderPath);
+    console.log(`Folder '${cameraFolderPath}' created successfully.`);
+  } else {
+    console.log(`Folder '${cameraFolderPath}' already exists.`);
   }
-  saveBlobUrlContent(
-    microphoneFolderPath,
-    event.message.blob,
-    `${new Date().toLocaleString().replaceAll("/", "-")}.wav`
-  );
 }
 
-// save all pictures to the /cameraImages folder
-const saveImagesToFolder = true;
 /** @param {BS.DeviceEventMap["cameraImage"]} event */
 function onCameraImage(event) {
-  if (!saveImagesToFolder) {
+  if (!saveCameraImagesToFolder) {
     return;
   }
   saveBlobUrlContent(
@@ -181,6 +169,23 @@ function onCameraImage(event) {
     event.message.blob,
     `${new Date().toLocaleString().replaceAll("/", "-")}.jpg`
   );
+}
+
+// DEVICE LISTENERS
+
+/** @param {BS.DeviceEventMap["acceleration"]} event */
+function onAcceleration(event) {
+  const device = event.target;
+  const { acceleration, timestamp } = event.message;
+  console.log(
+    `[${timestamp}] received acceleration data from "${device.name}"`,
+    acceleration
+  );
+}
+
+/** @param {BS.DeviceEventMap["microphoneData"]} event */
+function onMicrophoneData(event) {
+  //console.log(event.message.samples);
 }
 
 /** @type {BS.BoundDeviceEventListeners} */
