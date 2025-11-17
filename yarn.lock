@@ -216,10 +216,10 @@ brace-expansion@^2.0.1:
   dependencies:
     balanced-match "^1.0.0"
 
-brilliantsole@^0.0.51:
-  version "0.0.51"
-  resolved "https://registry.yarnpkg.com/brilliantsole/-/brilliantsole-0.0.51.tgz#2fcfbebdf42fc0e79b9c691cf946911b7587bf40"
-  integrity sha512-xIEErlTgEDFHW79hdYDKXwmmCFOB2cFnsOxY0dKiy8q6F0WbUtkKuPZaZW8VVW4ICpixDudLhilEXhI+jTHHrA==
+brilliantsole@^0.0.54:
+  version "0.0.54"
+  resolved "https://registry.yarnpkg.com/brilliantsole/-/brilliantsole-0.0.54.tgz#43d66c083cb91ea1adbb6ac11abc7cbc160c6542"
+  integrity sha512-Y07SUjFZNgjU6nRvnxkkmsvJzgsCaJwGn8rJzOQRt5nWyHp717Cs3m6jUs3cLgoZkNoyOjbKx7yeDtzwfurXTA==
   dependencies:
     "@abandonware/noble" "^1.9.2-24"
     auto-bind "^5.0.1"
