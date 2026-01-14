@@ -1246,10 +1246,10 @@ braces@^1.8.2:
     preserve "^0.2.0"
     repeat-element "^1.1.2"
 
-brilliantsole@^0.0.63:
-  version "0.0.63"
-  resolved "https://registry.yarnpkg.com/brilliantsole/-/brilliantsole-0.0.63.tgz#09b009233e5d8d4246b55a3ab78ecb2e3a17d091"
-  integrity sha512-iTpqaLlTh9IdnbAMmLN3Cd9DpWIFIOqSldLyEj+qpUWsAdn5iew+Gz+Ro5Ln/qATxu5aTrAN5hjOlhs0Zl+s9w==
+brilliantsole@^0.0.66:
+  version "0.0.66"
+  resolved "https://registry.yarnpkg.com/brilliantsole/-/brilliantsole-0.0.66.tgz#0e07e9774351b4872a09b4fc6ce96161b64efd5e"
+  integrity sha512-baMC7PlGIWWvKSElxJppNPw/2EEUpnFYPjCIvfQe1npitaZkAcsrWVcF4TasD5JSlbOGSng7Knqob7F1yIsqag==
   dependencies:
     "@abandonware/noble" "^1.9.2-24"
     alawmulaw "^6.0.0"
